@@ -13,4 +13,9 @@
     <ProjectReference Include="..\Skinet.Core\Skinet.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\Migrations\" />
+    <Folder Include="Data\SeedData\" />
+  </ItemGroup>
+
 </Project>

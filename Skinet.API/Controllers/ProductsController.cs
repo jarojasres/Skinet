@@ -35,5 +35,21 @@ namespace Skinet.API.Controllers
             var product = await _repo.GetProductByIdAsync(id);
             return Ok(product);
         }
+
+        [HttpGet("brands")]
+        public async Task<IActionResult> GetProductBrands()
+        {
+            var productBrands = await _repo.GetProductBrandsAsync();
+
+            return Ok(productBrands);
+        }
+
+        [HttpGet("types")]
+        public async Task<IActionResult> GetProductTypes()
+        {
+            var productTypes = await _repo.GetProductTypesAsync();
+
+            return Ok(productTypes);
+        }
     }
 }

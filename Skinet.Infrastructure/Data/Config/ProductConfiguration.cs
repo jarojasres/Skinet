@@ -16,7 +16,7 @@ namespace Skinet.Infrastructure.Data.Config
                 .HasMaxLength(100);
             builder.Property(p => p.Description)
                 .IsRequired()
-                .HasMaxLength(180);
+                .HasMaxLength(300);
             builder.Property(p => p.Price)
                 .HasColumnType("decimal(18,2)");
             builder.Property(p => p.PictureUrl)
