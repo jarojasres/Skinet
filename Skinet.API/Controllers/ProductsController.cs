@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Skinet.API.Dtos;
 using Skinet.Core.Entities;
 using Skinet.Core.Interfaces;
+using Skinet.Core.Specifications;
 using Skinet.Infrastructure.Data;
 
 namespace Skinet.API.Controllers
@@ -15,31 +18,42 @@ namespace Skinet.API.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly IProductRepository _repo;
-
-        public ProductsController(IProductRepository repo)
+        private readonly IGenericRepository<Product> _productsRepo;
+        private readonly IGenericRepository<ProductType> _productTypesRepo;
+        private readonly IGenericRepository<ProductBrand> _productBrandsRepo;
+        private readonly IMapper _mapper;
+        public ProductsController(IGenericRepository<Product> productsRepo, 
+            IGenericRepository<ProductType> productTypesRepo, 
+            IGenericRepository<ProductBrand> productBrandsRepo, 
+            IMapper mapper)
         {
-            _repo = repo;
+            _productsRepo = productsRepo;
+            _productTypesRepo = productTypesRepo;
+            _productBrandsRepo = productBrandsRepo;
+            _mapper = mapper;
         }
         [HttpGet]
         public async Task<IActionResult> GetProducts()
         {
-            var a = new Product();
-            var result = await _repo.GetProductsAsync();
+            var specification = new ProductsWithTypesAndBrandsSpecification();
+            var products = await _productsRepo.ListAsync(specification);
+            var result = _mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductDto>>(products);
             return Ok(result);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProduct(int id)
         {
-            var product = await _repo.GetProductByIdAsync(id);
-            return Ok(product);
+            var specification = new ProductsWithTypesAndBrandsSpecification(id);
+            var product = await _productsRepo.GetEntityWithSpec(specification);
+            var result = _mapper.Map<Product, ProductDto>(product);
+            return Ok(result);
         }
 
         [HttpGet("brands")]
         public async Task<IActionResult> GetProductBrands()
         {
-            var productBrands = await _repo.GetProductBrandsAsync();
+            var productBrands = await _productBrandsRepo.ListAllAsync();
 
             return Ok(productBrands);
         }
@@ -47,7 +61,7 @@ namespace Skinet.API.Controllers
         [HttpGet("types")]
         public async Task<IActionResult> GetProductTypes()
         {
-            var productTypes = await _repo.GetProductTypesAsync();
+            var productTypes = await _productTypesRepo.ListAllAsync();
 
             return Ok(productTypes);
         }
