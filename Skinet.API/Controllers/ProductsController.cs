@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Skinet.API.Dtos;
+using Skinet.API.Errors;
 using Skinet.Core.Entities;
 using Skinet.Core.Interfaces;
 using Skinet.Core.Specifications;
@@ -14,9 +15,8 @@ using Skinet.Infrastructure.Data;
 
 namespace Skinet.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ProductsController : ControllerBase
+    
+    public class ProductsController : BaseApiController
     {
         private readonly IGenericRepository<Product> _productsRepo;
         private readonly IGenericRepository<ProductType> _productTypesRepo;
@@ -33,7 +33,7 @@ namespace Skinet.API.Controllers
             _mapper = mapper;
         }
         [HttpGet]
-        public async Task<IActionResult> GetProducts()
+        public async Task<ActionResult<IReadOnlyList<ProductDto>>> GetProducts()
         {
             var specification = new ProductsWithTypesAndBrandsSpecification();
             var products = await _productsRepo.ListAsync(specification);
@@ -42,16 +42,24 @@ namespace Skinet.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetProduct(int id)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse),StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ProductDto>> GetProduct(int id)
         {
             var specification = new ProductsWithTypesAndBrandsSpecification(id);
             var product = await _productsRepo.GetEntityWithSpec(specification);
+
+            if (product == null)
+            {
+                return NotFound(new ApiResponse(404));
+            }
+
             var result = _mapper.Map<Product, ProductDto>(product);
             return Ok(result);
         }
 
         [HttpGet("brands")]
-        public async Task<IActionResult> GetProductBrands()
+        public async Task<ActionResult<IReadOnlyList<ProductBrand>>> GetProductBrands()
         {
             var productBrands = await _productBrandsRepo.ListAllAsync();
 
@@ -59,7 +67,7 @@ namespace Skinet.API.Controllers
         }
 
         [HttpGet("types")]
-        public async Task<IActionResult> GetProductTypes()
+        public async Task<ActionResult<IReadOnlyList<ProductType>>> GetProductTypes()
         {
             var productTypes = await _productTypesRepo.ListAllAsync();
 
