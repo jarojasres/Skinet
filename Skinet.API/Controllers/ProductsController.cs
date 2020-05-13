@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Skinet.API.Dtos;
 using Skinet.API.Errors;
+using Skinet.API.Helpers;
 using Skinet.Core.Entities;
 using Skinet.Core.Interfaces;
 using Skinet.Core.Specifications;
@@ -33,11 +34,17 @@ namespace Skinet.API.Controllers
             _mapper = mapper;
         }
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<ProductDto>>> GetProducts()
+        public async Task<ActionResult<Pagination<ProductDto>>> GetProducts([FromQuery]ProductSpecificationParams productParameters)
         {
-            var specification = new ProductsWithTypesAndBrandsSpecification();
+            var specification = new ProductsWithTypesAndBrandsSpecification(productParameters);
+            var countSpecification = new ProductWithFiltersForCountSpecification(productParameters);
+            var totalItems = await _productsRepo.CountAsync(countSpecification);
             var products = await _productsRepo.ListAsync(specification);
-            var result = _mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductDto>>(products);
+            var data = _mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductDto>>(products);
+
+            var result = new Pagination<ProductDto>(productParameters.PageIndex, productParameters.PageSize, totalItems,
+                data);
+
             return Ok(result);
         }
 
