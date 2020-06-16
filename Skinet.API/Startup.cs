@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Skinet.API.Configurations.Middlewares;
 using Skinet.API.Extensions;
 using Skinet.Infrastructure.Data;
+using StackExchange.Redis;
 
 namespace Skinet.API
 {
@@ -29,6 +30,13 @@ namespace Skinet.API
             services.AddControllers();
             services.AddDbContext<StoreContext>(options =>
                 options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddSingleton<IConnectionMultiplexer>(x =>
+            {
+                var configuration = ConfigurationOptions.Parse(_configuration.GetConnectionString("Redis"), true);
+
+                return ConnectionMultiplexer.Connect(configuration);
+            });
 
             services.AddApplicationServices();
 
