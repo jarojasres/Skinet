@@ -44,7 +44,7 @@ namespace Skinet.API.Controllers
         [HttpGet("badRequest")]
         public IActionResult GetBadRequest()
         {
-            return BadRequest();
+            return BadRequest(new ApiResponse(StatusCodes.Status400BadRequest));
         }
 
         [HttpGet("badRequest/{id}")]
