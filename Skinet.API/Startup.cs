@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Skinet.API.Configurations.Middlewares;
 using Skinet.API.Extensions;
 using Skinet.Infrastructure.Data;
+using Skinet.Infrastructure.Identity;
 using StackExchange.Redis;
 
 namespace Skinet.API
@@ -30,6 +31,9 @@ namespace Skinet.API
             services.AddControllers();
             services.AddDbContext<StoreContext>(options =>
                 options.UseSqlServer(_configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<AppIdentityDbContext>(options =>
+                options.UseSqlServer(_configuration.GetConnectionString("IdentityConnection")));
+            
 
             services.AddSingleton<IConnectionMultiplexer>(x =>
             {
