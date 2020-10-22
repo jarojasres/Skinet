@@ -43,7 +43,7 @@ namespace Skinet.API
             });
 
             services.AddApplicationServices();
-
+            services.AddIdentityServiceCollection(_configuration);
             services.AddSwaggerDocumentation();
 
             services.AddCors(options =>
@@ -65,6 +65,7 @@ namespace Skinet.API
             app.UseRouting();
             app.UseStaticFiles();
             app.UseCors("CorsPolicy");
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseSwaggerDocumentation();

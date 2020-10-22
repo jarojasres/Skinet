@@ -18,6 +18,7 @@ namespace Skinet.Infrastructure.Identity
                 {
                     DisplayName = "Julián Rojas",
                     Email = "jarojasres@gmail.com",
+                    UserName = "jarojasres@gmail.com",
                     Address = new Address
                     {
                         FirstName = "Julián",

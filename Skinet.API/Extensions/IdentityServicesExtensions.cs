@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Skinet.Core.Entities.Identity;
 using Skinet.Infrastructure.Identity;
 
@@ -11,7 +15,7 @@ namespace Skinet.API.Extensions
 {
     public static class IdentityServicesExtensions
     {
-        public static IServiceCollection AddIdentityServiceCollection(this IServiceCollection services)
+        public static IServiceCollection AddIdentityServiceCollection(this IServiceCollection services, IConfiguration config)
         {
             var builder = services.AddIdentityCore<AppUser>();
 
@@ -19,6 +23,16 @@ namespace Skinet.API.Extensions
             builder.AddEntityFrameworkStores<AppIdentityDbContext>();
             builder.AddSignInManager<SignInManager<AppUser>>();
 
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options => {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Token:Key"])),
+                        ValidIssuer = config["Token:Issuer"],
+                        ValidateIssuer = true
+                    };
+                });
             return services;
         }
     }
